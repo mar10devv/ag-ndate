@@ -1,0 +1,34 @@
+---
+import background from '../assets/background.svg';
+import SearchBar from '../components/SearchBar.tsx';
+---
+
+<section class="relative isolate overflow-hidden py-16 md:py-24">
+  <!-- Fondo -->
+  <img
+    src={background.src}
+    alt=""
+    class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-80 blur-[80px]"
+    fetchpriority="high"
+  />
+
+  <div
+    class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(1200px_800px_at_70%_10%,#e9e4ff_10%,transparent_60%)]"
+  />
+
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="mx-auto max-w-3xl text-center space-y-8">
+      <h1 class="text-4xl md:text-7xl font-extrabold leading-[1.1] tracking-tight">
+        Reserva servicios donde quiera que estes<br class="hidden md:block" />
+        con solo un clic
+      </h1>
+
+      <!-- 👇 Hidratar el buscador -->
+      <SearchBar client:load />
+
+      <p class="text-base md:text-lg text-neutral-700">
+        <strong class="font-semibold">746.828</strong> citas reservadas hoy
+      </p>
+    </div>
+  </div>
+</section>

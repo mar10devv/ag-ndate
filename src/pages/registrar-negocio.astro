@@ -1,0 +1,147 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SeleccionCategorias from "../components/SeleccionCategorias.tsx";
+---
+
+<Layout title="Registrar Negocio">
+  <main class="w-full min-h-screen flex items-center justify-center">
+    <section class="w-[560px] px-6 pt-24 md:pt-28 pb-16">
+      <!-- Encabezado -->
+      <h2 class="text-sm font-medium text-gray-500 mb-3 pb-6">
+        Configuración de cuenta
+      </h2>
+      <h1 class="text-5xl font-extrabold tracking-tight mb-4 pb-3">
+        ¿Cómo se llama tu negocio?
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed mb-10">
+        Este es el nombre comercial que verán tus clientes. Más adelante podrás
+        añadir la razón social.
+      </p>
+
+      <!-- Formulario -->
+      <form class="space-y-10">
+        <!-- Nombre del negocio -->
+        <div>
+          <label
+            for="nombre"
+            class="block text-base font-semibold text-gray-900 mb-2"
+          >
+            Nombre del negocio
+          </label>
+          <input
+            id="nombre"
+            name="nombre"
+            type="text"
+            placeholder="barbermartin"
+            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3
+                   text-base text-gray-900 placeholder-gray-400 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+          />
+        </div>
+
+        <!-- Categorías -->
+        <div>
+          <label class="block text-base font-semibold text-gray-900 mb-2">
+            Categoría de tu sitio web
+          </label>
+          <SeleccionCategorias client:load />
+        </div>
+
+        <!-- Miembros del equipo -->
+        <div class="relative">
+          <label class="block text-base font-semibold text-gray-900 mb-2">
+            Miembros en el equipo
+          </label>
+          <button
+            type="button"
+            id="dropdownEquipoButton"
+            class="w-full bg-gray-100 border border-gray-300 px-4 py-3 rounded-xl flex justify-between items-center hover:bg-gray-200"
+          >
+            Seleccionar cantidad
+            <span>▼</span>
+          </button>
+
+          <!-- Opciones -->
+          <div
+            id="dropdownEquipoMenu"
+            class="hidden absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+          >
+            <button type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50">Solo soy yo</button>
+            <button type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50">2–5 personas</button>
+            <button type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50">6–10 personas</button>
+            <button type="button" class="w-full px-4 py-3 text-left hover:bg-gray-50">Más de 11 personas</button>
+          </div>
+
+          <!-- input hidden para enviar el valor -->
+          <input type="hidden" name="miembros" id="miembrosInput" />
+        </div>
+
+        <!-- Dirección del negocio -->
+        <div>
+          <label for="direccion" class="block text-base font-semibold text-gray-900 mb-2">
+            ¿Cuál es la ubicación de tu negocio?
+          </label>
+          <input
+            id="direccion"
+            name="direccion"
+            type="text"
+            placeholder="Ej: Av. 18 de Julio 1234, Montevideo"
+            class="block w-full rounded-xl border border-gray-300 bg-white px-4 py-3
+                   text-base text-gray-900 placeholder-gray-400 shadow-sm
+                   focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+          />
+          <div class="mt-3 flex items-center gap-2">
+            <input
+              id="sinDireccion"
+              name="sinDireccion"
+              type="checkbox"
+              class="h-4 w-4 text-black border-gray-300 rounded"
+            />
+            <label for="sinDireccion" class="text-sm text-gray-700">
+              Mi negocio no tiene una dirección física (solo ofrezco servicios por teléfono u online)
+            </label>
+          </div>
+        </div>
+
+        <!-- Botón siguiente -->
+        <div>
+          <button
+            type="submit"
+            class="w-full bg-black text-white font-semibold py-3 rounded-md
+                   hover:bg-gray-800 transition"
+          >
+            Siguiente →
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const buttonEquipo = document.getElementById("dropdownEquipoButton");
+    const menuEquipo = document.getElementById("dropdownEquipoMenu");
+    const inputEquipo = document.getElementById("miembrosInput");
+
+    // Abrir/cerrar menú al presionar el botón principal
+    buttonEquipo?.addEventListener("click", () => {
+      menuEquipo?.classList.toggle("hidden");
+    });
+
+    // Manejo de selección
+    menuEquipo?.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const value = btn.innerText;
+
+        if (buttonEquipo) {
+          buttonEquipo.innerHTML = value + ' <span>▼</span>';
+        }
+
+        if (inputEquipo) {
+          inputEquipo.value = value;
+        }
+
+        menuEquipo?.classList.add("hidden");
+      });
+    });
+  </script>
+</Layout>

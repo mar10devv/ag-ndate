@@ -18,7 +18,8 @@ const clientes: Link[] = [
   { label: "Ayuda y servicio al cliente", href: "/ayuda" },
 ];
 
-const negociosHref = "/negocios";
+// 🔗 Ahora apunta a la página registrar-negocio
+const negociosHref = "/registrar-negocio";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -102,8 +103,11 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <a href="/" className="text-lg font-semibold tracking-tight">
-            Agéndate
+          <a
+            href="/"
+            className="text-3xl font-bold lowercase tracking-tight text-neutral-900 font-inter"
+          >
+            agéndate
           </a>
 
           {/* Desktop */}

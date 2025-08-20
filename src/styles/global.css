@@ -1,2 +1,18 @@
 @import "tailwindcss";
 @import "@fontsource/inter";
+@import "swiper/css";
+@import "swiper/css/pagination";
+@import "swiper/css/navigation";
+/* Fija un ancho a las tarjetas del carrusel */
+.swiper-slide {
+  width: 260px;   /* puedes ajustar entre 220px - 280px */
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Opcional: espacio entre slides */
+.swiper {
+  padding: 40px 0; /* para que no quede pegado arriba/abajo */
+}

@@ -1,0 +1,25 @@
+---
+// src/pages/panel.astro
+import "../styles/global.css";
+import Dashboard from "../components/DashboardTemp.tsx";
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel Premium</title>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white shadow p-4 mb-6">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold text-gray-800">Panel Premium</h1>
+        <a href="/" class="text-blue-600 hover:underline">Volver al inicio</a>
+      </div>
+    </nav>
+
+    <main class="container mx-auto px-4">
+      <Dashboard client:load />
+    </main>
+  </body>
+</html>

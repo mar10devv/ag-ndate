@@ -8,18 +8,14 @@ import {
   getRedirectResult,
   type User,
 } from "firebase/auth";
-import { auth, googleProvider } from "../lib/firebase";
+import { auth, googleProvider, db } from "../lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-type Link = { label: string; href: string };
-
-const clientes: Link[] = [
+const clientes = [
   { label: "Iniciar sesión o registrarse", href: "/login" },
   { label: "Descargar la app", href: "/app" },
   { label: "Ayuda y servicio al cliente", href: "/ayuda" },
 ];
-
-// 🔗 Ahora apunta a la página registrar-negocio
-const negociosHref = "/registrar-negocio";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,6 +23,7 @@ export default function Navbar() {
   const [lang, setLang] = useState<"es-ES" | "es-UY">("es-ES");
   const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isPremium, setIsPremium] = useState<boolean | null>(null);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -57,9 +54,20 @@ export default function Navbar() {
       })
       .finally(() => setCheckingAuth(false));
 
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       setCheckingAuth(false);
+
+      if (u) {
+        const snap = await getDoc(doc(db, "Usuarios", u.uid));
+        if (snap.exists()) {
+          setIsPremium(snap.data()?.premium ?? false);
+        } else {
+          setIsPremium(false);
+        }
+      } else {
+        setIsPremium(null);
+      }
     });
 
     return () => unsub();
@@ -142,14 +150,27 @@ export default function Navbar() {
               </button>
             )}
 
-            <a
-              href={negociosHref}
-              className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
-            >
-              Registra tu negocio
-            </a>
+            {/* 🔄 Dinámico según usuario */}
+            {user ? (
+  isPremium ? (
+    <a
+      href="/panel"  // ✅ AQUÍ CAMBIO
+      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
+    >
+      Panel de control
+    </a>
 
-            {/* Dropdown menú */}
+              ) : (
+                <a
+                  href="/registrar-negocio"
+                  className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
+                >
+                  Registrar negocio
+                </a>
+              )
+            ) : null}
+
+            {/* Dropdown */}
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
@@ -160,13 +181,8 @@ export default function Navbar() {
               >
                 Menú ☰
               </button>
-
               {menuOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-3 shadow-xl"
-                  role="menu"
-                >
-                  {/* Tarjeta: Para clientes */}
+                <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-3 shadow-xl" role="menu">
                   <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
                     <div className="mb-2 text-sm font-semibold">Para clientes</div>
                     <ul className="space-y-1 text-sm">
@@ -184,25 +200,18 @@ export default function Navbar() {
                               {user ? "Mi cuenta" : l.label}
                             </button>
                           ) : (
-                            <a
-                              className="block rounded-md px-2 py-1.5 hover:bg-neutral-50"
-                              href={l.href}
-                            >
+                            <a className="block rounded-md px-2 py-1.5 hover:bg-neutral-50" href={l.href}>
                               {l.label}
                             </a>
                           )}
                         </li>
                       ))}
                     </ul>
-
-                    {/* Idioma */}
                     <div className="my-3 h-px bg-neutral-200" />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm">
                         <span aria-hidden>🌐</span>
-                        <span>
-                          {lang === "es-ES" ? "español (ES)" : "español (UY)"}
-                        </span>
+                        <span>{lang === "es-ES" ? "español (ES)" : "español (UY)"}</span>
                       </div>
                       <select
                         aria-label="Seleccionar idioma"
@@ -216,20 +225,44 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  {/* Para negocios */}
-                  <a
-                    href={negociosHref}
-                    className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
-                  >
-                    <span>Para negocios</span>
-                    <span aria-hidden>→</span>
-                  </a>
+                  {/* Negocio desde menú */}
+                  {user ? (
+                    isPremium ? (
+                      <a
+                        href="/dashboard"
+                        className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                      >
+                        <span>Panel de control</span>
+                        <span aria-hidden>→</span>
+                      </a>
+                    ) : (
+                      <a
+                        href="/registrar-negocio"
+                        className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                      >
+                        <span>Registrar negocio</span>
+                        <span aria-hidden>→</span>
+                      </a>
+                    )
+                  ) : (
+                    <button
+                      type="button"
+                      className="mt-3 w-full text-left flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleLogin();
+                      }}
+                    >
+                      <span>Iniciar sesión</span>
+                      <span aria-hidden>→</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           </nav>
 
-          {/* Botón hamburguesa móvil */}
+          {/* Botón mobile */}
           <button
             type="button"
             onClick={() => setMobileOpen((prev) => !prev)}
@@ -242,21 +275,16 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Sheet móvil */}
+      {/* Sheet mobile */}
       {mobileOpen &&
         createPortal(
           <div className="fixed inset-0 z-[60]">
-            <div
-              className="absolute inset-0 bg-black/40"
-              onClick={() => setMobileOpen(false)}
-              aria-hidden="true"
-            />
+            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} aria-hidden="true" />
             <div className="absolute inset-y-0 right-0 w-80 max-w-[88%] bg-white shadow-xl">
               <div className="flex items-center justify-between p-4">
                 <span className="text-base font-semibold">Menú</span>
               </div>
 
-              {/* Contenido móvil */}
               <div className="px-4 pb-6">
                 <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
                   <div className="mb-2 text-sm font-semibold">Para clientes</div>
@@ -291,9 +319,7 @@ export default function Navbar() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm">
                       <span aria-hidden>🌐</span>
-                      <span>
-                        {lang === "es-ES" ? "español (ES)" : "español (UY)"}
-                      </span>
+                      <span>{lang === "es-ES" ? "español (ES)" : "español (UY)"}</span>
                     </div>
                     <select
                       aria-label="Seleccionar idioma"
@@ -307,14 +333,40 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <a
-                  href={negociosHref}
-                  className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <span>Para negocios</span>
-                  <span aria-hidden>→</span>
-                </a>
+                {/* 🔁 Dinámico para negocios en mobile */}
+                {user ? (
+                  isPremium ? (
+                    <a
+                      href="/dashboard"
+                      className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>Panel de control</span>
+                      <span aria-hidden>→</span>
+                    </a>
+                  ) : (
+                    <a
+                      href="/registrar-negocio"
+                      className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <span>Registrar negocio</span>
+                      <span aria-hidden>→</span>
+                    </a>
+                  )
+                ) : (
+                  <button
+                    type="button"
+                    className="mt-3 w-full text-left flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleLogin();
+                    }}
+                  >
+                    <span>Iniciar sesión</span>
+                    <span aria-hidden>→</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>,

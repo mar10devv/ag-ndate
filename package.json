@@ -19,7 +19,8 @@
     "firebase": "^12.1.0",
     "react": "^19.1.1",
     "react-day-picker": "^9.9.0",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "swiper": "^11.2.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

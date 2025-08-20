@@ -1,4 +1,5 @@
 // src/lib/firebase.ts
+import { getFirestore } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -31,3 +32,4 @@ setPersistence(auth, browserLocalPersistence).catch((err) => {
 
 // Proveedor de Google
 export const googleProvider = new GoogleAuthProvider();
+export const db = getFirestore(app);

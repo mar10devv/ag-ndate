@@ -5,27 +5,24 @@ import SeleccionCategorias from "../components/SeleccionCategorias.tsx";
 
 <Layout title="Registrar Negocio">
   <main class="w-full min-h-screen flex items-center justify-center">
-    <section class="w-[560px] px-6 pt-24 md:pt-28 pb-16">
-      <!-- Encabezado -->
-      <h2 class="text-sm font-medium text-gray-500 mb-3 pb-6">
+    <section class="w-full max-w-5xl px-6 pt-24 md:pt-28 pb-16 mx-auto">
+      <!-- Encabezado dinámico -->
+      <h2 id="encabezadoSecundario" class="text-sm font-medium text-gray-500 mb-3 pb-6">
         Configuración de cuenta
       </h2>
-      <h1 class="text-5xl font-extrabold tracking-tight mb-4 pb-3">
+      <h1 id="encabezadoPrincipal" class="text-5xl font-extrabold tracking-tight mb-4 pb-3">
         ¿Cómo se llama tu negocio?
       </h1>
-      <p class="text-lg text-gray-600 leading-relaxed mb-10">
+      <p id="encabezadoTexto" class="text-lg text-gray-600 leading-relaxed mb-10">
         Este es el nombre comercial que verán tus clientes. Más adelante podrás
         añadir la razón social.
       </p>
 
       <!-- Formulario -->
-      <form class="space-y-10">
+      <form id="formNegocio" class="space-y-10">
         <!-- Nombre del negocio -->
         <div>
-          <label
-            for="nombre"
-            class="block text-base font-semibold text-gray-900 mb-2"
-          >
+          <label for="nombre" class="block text-base font-semibold text-gray-900 mb-2">
             Nombre del negocio
           </label>
           <input
@@ -114,34 +111,226 @@ import SeleccionCategorias from "../components/SeleccionCategorias.tsx";
           </button>
         </div>
       </form>
+
+      <!-- Sección precios -->
+      <div id="preciosSection" class="hidden space-y-6">
+        <h2 class="text-3xl font-bold mb-4">Planes y precios</h2>
+
+        <!-- Carrusel Coverflow -->
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper">
+            <!-- Card Básico -->
+            <div class="swiper-slide">
+              <div class="plan bg-pink-100 rounded-xl shadow-lg p-6 text-center cursor-pointer"
+                   data-plan="Básico" data-precio="25" data-max="1">
+                <h3 class="font-bold text-lg">Básico</h3>
+                <p class="text-gray-600 text-sm">Ideal para comenzar</p>
+                <p class="font-bold text-xl">$25/mes</p>
+                <p class="text-gray-500 text-sm">Incluye 1 trabajador</p>
+              </div>
+            </div>
+
+            <!-- Card Estándar -->
+            <div class="swiper-slide">
+              <div class="plan bg-green-100 rounded-xl shadow-lg p-6 text-center cursor-pointer"
+                   data-plan="Estándar" data-precio="50" data-max="3">
+                <h3 class="font-bold text-lg">Estándar</h3>
+                <p class="text-gray-600 text-sm">Para equipos pequeños</p>
+                <p class="font-bold text-xl">$50/mes</p>
+                <p class="text-gray-500 text-sm">Incluye hasta 3 trabajadores</p>
+              </div>
+            </div>
+
+            <!-- Card Pro -->
+            <div class="swiper-slide">
+              <div class="plan bg-yellow-100 rounded-xl shadow-lg p-6 text-center cursor-pointer"
+                   data-plan="Pro" data-precio="100" data-max="5">
+                <h3 class="font-bold text-lg">Pro</h3>
+                <p class="text-gray-600 text-sm">Para negocios en crecimiento</p>
+                <p class="font-bold text-xl">$100/mes</p>
+                <p class="text-gray-500 text-sm">Incluye hasta 5 trabajadores</p>
+              </div>
+            </div>
+
+            <!-- Card Ultra Pro -->
+            <div class="swiper-slide">
+              <div class="plan bg-purple-100 rounded-xl shadow-lg p-6 text-center cursor-pointer"
+                   data-plan="Ultra Pro" data-precio="140" data-max="10">
+                <h3 class="font-bold text-lg">Ultra Pro</h3>
+                <p class="text-gray-600 text-sm">Para empresas más grandes</p>
+                <p class="font-bold text-xl">$140/mes</p>
+                <p class="text-gray-500 text-sm">Incluye hasta 10 trabajadores</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paginación -->
+          <div class="swiper-pagination mt-4"></div>
+        </div>
+
+        <div class="mt-6">
+          <button
+            id="btnPlanSiguiente"
+            class="hidden w-full bg-black text-white font-semibold py-3 rounded-md hover:bg-gray-800 transition"
+          >
+            Siguiente →
+          </button>
+        </div>
+      </div>
+
+      <!-- Script Swiper -->
+      <script>
+        import Swiper, { EffectCoverflow, Pagination } from "swiper";
+
+        const swiper = new Swiper(".mySwiper", {
+          effect: "coverflow",
+          grabCursor: true,
+          centeredSlides: true,
+          slidesPerView: "auto",
+          coverflowEffect: {
+            rotate: 0,
+            stretch: 0,
+            depth: 150,
+            modifier: 2,
+            slideShadows: false,
+          },
+          pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+          },
+        });
+      </script>
+
+      <!-- Sección pago -->
+      <div id="pagoSection" class="hidden space-y-6">
+        <h2 class="text-3xl font-bold mb-4">Método de pago</h2>
+        <p id="pagoResumen" class="text-lg text-gray-700"></p>
+
+        <div class="space-y-4">
+          <label class="flex items-center gap-2">
+            <input type="radio" name="metodoPago" value="PagSeguro" class="h-4 w-4" />
+            <span>PagSeguro (tarjeta, débito, etc.)</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="metodoPago" value="Abitab" class="h-4 w-4" />
+            <span>Transferencia por Abitab</span>
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" name="metodoPago" value="RedPagos" class="h-4 w-4" />
+            <span>Transferencia por RedPagos</span>
+          </label>
+        </div>
+
+        <!-- Botones acción -->
+        <div class="flex gap-4">
+          <button
+            id="btnVolverPlanes"
+            type="button"
+            class="w-1/2 bg-gray-200 text-black font-semibold py-3 rounded-md hover:bg-gray-300 transition"
+          >
+            ← Volver
+          </button>
+          <button
+            class="w-1/2 bg-black text-white font-semibold py-3 rounded-md hover:bg-gray-800 transition"
+          >
+            Confirmar pago →
+          </button>
+        </div>
+      </div>
     </section>
   </main>
 
-  <script>
+  <style>
+    .plan-seleccionado {
+      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+      color: white;
+      border: 2px solid #000;
+      transform: scale(1.05);
+      transition: all 0.3s ease;
+    }
+  </style>
+
+  <script is:inline>
     const buttonEquipo = document.getElementById("dropdownEquipoButton");
     const menuEquipo = document.getElementById("dropdownEquipoMenu");
     const inputEquipo = document.getElementById("miembrosInput");
+    const form = document.getElementById("formNegocio");
+    const preciosSection = document.getElementById("preciosSection");
+    const pagoSection = document.getElementById("pagoSection");
+    const pagoResumen = document.getElementById("pagoResumen");
+    const btnPlanSiguiente = document.getElementById("btnPlanSiguiente");
+    const btnVolverPlanes = document.getElementById("btnVolverPlanes");
 
-    // Abrir/cerrar menú al presionar el botón principal
+    let planSeleccionado = null;
+    let precioSeleccionado = null;
+    let maxEmpleados = null;
+
+    // Encabezados
+    const encabezadoSecundario = document.getElementById("encabezadoSecundario");
+    const encabezadoPrincipal = document.getElementById("encabezadoPrincipal");
+    const encabezadoTexto = document.getElementById("encabezadoTexto");
+
+    // Abrir/cerrar menú equipo
     buttonEquipo?.addEventListener("click", () => {
       menuEquipo?.classList.toggle("hidden");
     });
 
-    // Manejo de selección
     menuEquipo?.querySelectorAll("button").forEach((btn) => {
       btn.addEventListener("click", () => {
         const value = btn.innerText;
-
-        if (buttonEquipo) {
-          buttonEquipo.innerHTML = value + ' <span>▼</span>';
-        }
-
-        if (inputEquipo) {
-          inputEquipo.value = value;
-        }
-
+        if (buttonEquipo) buttonEquipo.innerHTML = value + ' <span>▼</span>';
+        if (inputEquipo) inputEquipo.value = value;
         menuEquipo?.classList.add("hidden");
       });
+    });
+
+    // Paso 1: enviar formulario
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      encabezadoSecundario.textContent = "Suscripción";
+      encabezadoPrincipal.textContent = "Elige tu plan";
+      encabezadoTexto.textContent = "Selecciona el plan que mejor se adapte a tu negocio.";
+      form.classList.add("hidden");
+      preciosSection?.classList.remove("hidden");
+    });
+
+    // Paso 2: seleccionar plan
+    document.querySelectorAll(".plan").forEach((card) => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".plan").forEach(c => c.classList.remove("plan-seleccionado"));
+        card.classList.add("plan-seleccionado");
+
+        planSeleccionado = card.dataset.plan;
+        precioSeleccionado = card.dataset.precio;
+        maxEmpleados = card.dataset.max;
+
+        btnPlanSiguiente.classList.remove("hidden");
+      });
+    });
+
+    // Paso 3: siguiente → formulario de pago
+    btnPlanSiguiente?.addEventListener("click", () => {
+      encabezadoSecundario.textContent = "Pago";
+      encabezadoPrincipal.textContent = "Método de pago";
+      encabezadoTexto.textContent = "Completa el pago para activar tu plan.";
+
+      preciosSection?.classList.add("hidden");
+      pagoSection?.classList.remove("hidden");
+
+      if (planSeleccionado && precioSeleccionado && maxEmpleados) {
+        pagoResumen.textContent = `Has seleccionado el plan ${planSeleccionado} por $${precioSeleccionado}/mes. 
+        Este plan incluye un máximo de ${maxEmpleados} trabajador(es) que podrán recibir reservas.`;
+      }
+    });
+
+    // Volver a planes desde pago
+    btnVolverPlanes?.addEventListener("click", () => {
+      encabezadoSecundario.textContent = "Suscripción";
+      encabezadoPrincipal.textContent = "Elige tu plan";
+      encabezadoTexto.textContent = "Selecciona el plan que mejor se adapte a tu negocio.";
+
+      pagoSection?.classList.add("hidden");
+      preciosSection?.classList.remove("hidden");
     });
   </script>
 </Layout>

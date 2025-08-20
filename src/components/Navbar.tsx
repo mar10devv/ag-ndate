@@ -43,35 +43,41 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          setUser(result.user);
-        }
-      })
-      .catch((error) => {
-        console.error("Redirect login error:", error);
-      })
-      .finally(() => setCheckingAuth(false));
+  let unsub: (() => void) | null = null;
 
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      setCheckingAuth(false);
-
-      if (u) {
-        const snap = await getDoc(doc(db, "Usuarios", u.uid));
-        if (snap.exists()) {
-          setIsPremium(snap.data()?.premium ?? false);
-        } else {
-          setIsPremium(false);
-        }
-      } else {
-        setIsPremium(null);
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result?.user) {
+        setUser(result.user);
+        console.log("✅ Sesión iniciada con redirect");
       }
+    })
+    .catch((error) => {
+      console.error("❌ Error al obtener redirect result:", error);
+    })
+    .finally(() => {
+      unsub = onAuthStateChanged(auth, async (u) => {
+        setUser(u);
+        setCheckingAuth(false);
+
+        if (u) {
+          const snap = await getDoc(doc(db, "Usuarios", u.uid));
+          if (snap.exists()) {
+            setIsPremium(snap.data()?.premium ?? false);
+          } else {
+            setIsPremium(false);
+          }
+        } else {
+          setIsPremium(null);
+        }
+      });
     });
 
-    return () => unsub();
-  }, []);
+  return () => {
+    if (unsub) unsub();
+  };
+}, []);
+
 
   const handleLogin = async () => {
     try {
@@ -228,13 +234,15 @@ export default function Navbar() {
                   {/* Negocio desde menú */}
                   {user ? (
                     isPremium ? (
-                      <a
-                        href="/dashboard"
-                        className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
-                      >
-                        <span>Panel de control</span>
-                        <span aria-hidden>→</span>
-                      </a>
+                     <a
+  href="/panel"
+  className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+  onClick={() => setMobileOpen(false)}
+>
+  <span>Panel de control</span>
+  <span aria-hidden>→</span>
+</a>
+
                     ) : (
                       <a
                         href="/registrar-negocio"

@@ -10,8 +10,6 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { setPersistence, browserLocalPersistence } from "firebase/auth";
-
 
 const clientes = [
   { label: "Iniciar sesión o registrarse", href: "/login" },
@@ -44,61 +42,58 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-useEffect(() => {
-  let unsub: (() => void) | null = null;
+  useEffect(() => {
+    let unsub: (() => void) | null = null;
 
-  const checkAuth = async () => {
-    try {
-      const result = await getRedirectResult(auth);
+    const checkAuth = async () => {
+      try {
+        const result = await getRedirectResult(auth);
 
-      if (result?.user) {
-        setUser(result.user);
-        const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
-        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+        if (result?.user) {
+          setUser(result.user);
+          const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
+          setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+          setCheckingAuth(false);
+          return; // ✅ Ya obtuvimos al usuario, salimos
+        }
+      } catch (error) {
+        console.error("❌ Error al obtener redirect result:", error);
+      }
+
+      // 🔁 Si no hubo redirect, usamos el listener normal
+      unsub = onAuthStateChanged(auth, async (u) => {
+        setUser(u);
         setCheckingAuth(false);
-        return; // ✅ Ya obtuvimos al usuario, salimos
-      }
-    } catch (error) {
-      console.error("❌ Error al obtener redirect result:", error);
-    }
 
-    // 🔁 Si no hubo redirect, usamos el listener normal
-    unsub = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      setCheckingAuth(false);
+        if (u) {
+          const snap = await getDoc(doc(db, "Usuarios", u.uid));
+          setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+        } else {
+          setIsPremium(null);
+        }
+      });
+    };
 
-      if (u) {
-        const snap = await getDoc(doc(db, "Usuarios", u.uid));
-        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
-      } else {
-        setIsPremium(null);
-      }
-    });
-  };
+    checkAuth();
 
-  checkAuth();
+    return () => {
+      if (unsub) unsub();
+    };
+  }, []);
 
-  return () => {
-    if (unsub) unsub();
-  };
-}, []);
-
-
+  // 👇 handleLogin actualizado
   const handleLogin = async () => {
-  try {
-    await setPersistence(auth, browserLocalPersistence); // ✅ esto asegura que la sesión quede guardada
-
-    if (window.location.hostname === "localhost") {
-      await signInWithPopup(auth, googleProvider);
-    } else {
-      await signInWithRedirect(auth, googleProvider);
+    try {
+      if (window.location.hostname === "localhost") {
+        await signInWithPopup(auth, googleProvider);
+      } else {
+        await signInWithRedirect(auth, googleProvider);
+      }
+    } catch (e) {
+      console.error("[Navbar] login error:", e);
+      alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
     }
-  } catch (e) {
-    console.error("[Navbar] login error:", e);
-    alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
-  }
-};
-
+  };
 
   const handleLogout = () => {
     signOut(auth).catch((e) => console.error("[Navbar] signOut error:", e));
@@ -166,14 +161,13 @@ useEffect(() => {
 
             {/* 🔄 Dinámico según usuario */}
             {user ? (
-  isPremium ? (
-    <a
-      href="/panel"  // ✅ AQUÍ CAMBIO
-      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
-    >
-      Panel de control
-    </a>
-
+              isPremium ? (
+                <a
+                  href="/panel"
+                  className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
+                >
+                  Panel de control
+                </a>
               ) : (
                 <a
                   href="/registrar-negocio"
@@ -196,9 +190,14 @@ useEffect(() => {
                 Menú ☰
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-3 shadow-xl" role="menu">
+                <div
+                  className="absolute right-0 mt-2 w-72 rounded-2xl border border-neutral-200 bg-white p-3 shadow-xl"
+                  role="menu"
+                >
                   <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
-                    <div className="mb-2 text-sm font-semibold">Para clientes</div>
+                    <div className="mb-2 text-sm font-semibold">
+                      Para clientes
+                    </div>
                     <ul className="space-y-1 text-sm">
                       {clientes.map((l) => (
                         <li key={l.href}>
@@ -214,7 +213,10 @@ useEffect(() => {
                               {user ? "Mi cuenta" : l.label}
                             </button>
                           ) : (
-                            <a className="block rounded-md px-2 py-1.5 hover:bg-neutral-50" href={l.href}>
+                            <a
+                              className="block rounded-md px-2 py-1.5 hover:bg-neutral-50"
+                              href={l.href}
+                            >
                               {l.label}
                             </a>
                           )}
@@ -225,7 +227,9 @@ useEffect(() => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm">
                         <span aria-hidden>🌐</span>
-                        <span>{lang === "es-ES" ? "español (ES)" : "español (UY)"}</span>
+                        <span>
+                          {lang === "es-ES" ? "español (ES)" : "español (UY)"}
+                        </span>
                       </div>
                       <select
                         aria-label="Seleccionar idioma"
@@ -242,15 +246,14 @@ useEffect(() => {
                   {/* Negocio desde menú */}
                   {user ? (
                     isPremium ? (
-                     <a
-  href="/panel"
-  className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
-  onClick={() => setMobileOpen(false)}
->
-  <span>Panel de control</span>
-  <span aria-hidden>→</span>
-</a>
-
+                      <a
+                        href="/panel"
+                        className="mt-3 flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span>Panel de control</span>
+                        <span aria-hidden>→</span>
+                      </a>
                     ) : (
                       <a
                         href="/registrar-negocio"
@@ -295,7 +298,11 @@ useEffect(() => {
       {mobileOpen &&
         createPortal(
           <div className="fixed inset-0 z-[60]">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
+            />
             <div className="absolute inset-y-0 right-0 w-80 max-w-[88%] bg-white shadow-xl">
               <div className="flex items-center justify-between p-4">
                 <span className="text-base font-semibold">Menú</span>
@@ -303,7 +310,9 @@ useEffect(() => {
 
               <div className="px-4 pb-6">
                 <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
-                  <div className="mb-2 text-sm font-semibold">Para clientes</div>
+                  <div className="mb-2 text-sm font-semibold">
+                    Para clientes
+                  </div>
                   <ul className="space-y-1 text-sm">
                     {clientes.map((l) => (
                       <li key={l.href}>
@@ -335,7 +344,9 @@ useEffect(() => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm">
                       <span aria-hidden>🌐</span>
-                      <span>{lang === "es-ES" ? "español (ES)" : "español (UY)"}</span>
+                      <span>
+                        {lang === "es-ES" ? "español (ES)" : "español (UY)"}
+                      </span>
                     </div>
                     <select
                       aria-label="Seleccionar idioma"

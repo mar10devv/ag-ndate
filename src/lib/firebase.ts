@@ -8,10 +8,10 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 
-// ⚡️ Configuración de Firebase (ajustada con tu dominio en authDomain)
+// ⚡️ Configuración de Firebase (manteniendo el authDomain original de Firebase)
 const firebaseConfig = {
   apiKey: "AIzaSyDMfXjFrcsO_aW53BCcfIMgfZd7gMGf9Jk",
-  authDomain: "agendateya.netlify.app", // 👈 cambiado a tu dominio en Netlify
+  authDomain: "agendate-4b2c3.firebaseapp.com", // 👈 este debe ser el dominio oficial de Firebase
   projectId: "agendate-4b2c3",
   storageBucket: "agendate-4b2c3.appspot.com",
   messagingSenderId: "961632832785",

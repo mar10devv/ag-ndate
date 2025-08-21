@@ -42,7 +42,7 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
- useEffect(() => {
+useEffect(() => {
   let unsub: (() => void) | null = null;
 
   const checkAuth = async () => {
@@ -50,20 +50,22 @@ export default function Navbar() {
       const result = await getRedirectResult(auth);
 
       if (result?.user) {
-        console.log("✅ Usuario desde getRedirectResult:", result.user);
+        console.log("✅ Redirect result user:", result.user);
         setUser(result.user);
+
         const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
         setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
         setCheckingAuth(false);
         return;
+      } else {
+        console.log("⚠️ No redirect result user");
       }
     } catch (error) {
       console.error("❌ Error al obtener redirect result:", error);
     }
 
-    // Escuchar cambios de sesión SIEMPRE
     unsub = onAuthStateChanged(auth, async (u) => {
-      console.log("👀 onAuthStateChanged =>", u);
+      console.log("📡 onAuthStateChanged user:", u);
       setUser(u);
       setCheckingAuth(false);
 
@@ -82,6 +84,7 @@ export default function Navbar() {
     if (unsub) unsub();
   };
 }, []);
+
 
 
   // 👇 handleLogin actualizado

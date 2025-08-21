@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   onAuthStateChanged,
-  signInWithRedirect,
   signInWithPopup,
   signOut,
   getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
   type User,
 } from "firebase/auth";
 import { auth, googleProvider, db } from "../lib/firebase";
@@ -85,21 +86,18 @@ useEffect(() => {
   };
 }, []);
 
-
-
   // 👇 handleLogin actualizado
   const handleLogin = async () => {
-    try {
-      if (window.location.hostname === "localhost") {
-        await signInWithPopup(auth, googleProvider);
-      } else {
-        await signInWithRedirect(auth, googleProvider);
-      }
-    } catch (e) {
-      console.error("[Navbar] login error:", e);
-      alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
-    }
-  };
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+
+    // 🚀 Forzar SIEMPRE popup (tanto en local como en Netlify)
+    await signInWithPopup(auth, googleProvider);
+  } catch (e) {
+    console.error("[Navbar] login error:", e);
+    alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
+  }
+};
 
   const handleLogout = () => {
     signOut(auth).catch((e) => console.error("[Navbar] signOut error:", e));

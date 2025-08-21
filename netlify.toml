@@ -2,13 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
-# 🔑 Muy importante: forzar que Firebase Auth handler se resuelva en el cliente
 [[redirects]]
   from = "/__/auth/handler"
   to = "/index.html"
   status = 200
 
-# SPA fallback (todas las demás rutas van al cliente)
 [[redirects]]
   from = "/*"
   to = "/index.html"

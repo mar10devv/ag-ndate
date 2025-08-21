@@ -42,44 +42,47 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
-    let unsub: (() => void) | null = null;
+ useEffect(() => {
+  let unsub: (() => void) | null = null;
 
-    const checkAuth = async () => {
-      try {
-        const result = await getRedirectResult(auth);
+  const checkAuth = async () => {
+    try {
+      const result = await getRedirectResult(auth);
 
-        if (result?.user) {
-          setUser(result.user);
-          const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
-          setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
-          setCheckingAuth(false);
-          return; // ✅ Ya obtuvimos al usuario, salimos
-        }
-      } catch (error) {
-        console.error("❌ Error al obtener redirect result:", error);
-      }
-
-      // 🔁 Si no hubo redirect, usamos el listener normal
-      unsub = onAuthStateChanged(auth, async (u) => {
-        setUser(u);
+      if (result?.user) {
+        console.log("✅ Usuario desde getRedirectResult:", result.user);
+        setUser(result.user);
+        const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
+        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
         setCheckingAuth(false);
+        return;
+      }
+    } catch (error) {
+      console.error("❌ Error al obtener redirect result:", error);
+    }
 
-        if (u) {
-          const snap = await getDoc(doc(db, "Usuarios", u.uid));
-          setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
-        } else {
-          setIsPremium(null);
-        }
-      });
-    };
+    // Escuchar cambios de sesión SIEMPRE
+    unsub = onAuthStateChanged(auth, async (u) => {
+      console.log("👀 onAuthStateChanged =>", u);
+      setUser(u);
+      setCheckingAuth(false);
 
-    checkAuth();
+      if (u) {
+        const snap = await getDoc(doc(db, "Usuarios", u.uid));
+        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+      } else {
+        setIsPremium(null);
+      }
+    });
+  };
 
-    return () => {
-      if (unsub) unsub();
-    };
-  }, []);
+  checkAuth();
+
+  return () => {
+    if (unsub) unsub();
+  };
+}, []);
+
 
   // 👇 handleLogin actualizado
   const handleLogin = async () => {

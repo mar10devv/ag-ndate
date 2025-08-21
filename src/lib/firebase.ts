@@ -11,7 +11,7 @@ import {
 // ⚡️ Configuración que te dio Firebase (ajustada en storageBucket)
 const firebaseConfig = {
   apiKey: "AIzaSyDMfXjFrcsO_aW53BCcfIMgfZd7gMGf9Jk",
-  authDomain: "agendateya.netlify.app", // ✅ CORREGIDO
+  authDomain: "agendate-4b2c3.firebaseapp.com",
   projectId: "agendate-4b2c3",
   storageBucket: "agendate-4b2c3.appspot.com",
   messagingSenderId: "961632832785",

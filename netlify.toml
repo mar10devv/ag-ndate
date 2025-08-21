@@ -2,14 +2,15 @@
   command = "npm run build"
   publish = "dist"
 
+# ⚡ Manejo del redirect de Firebase Auth
 [[redirects]]
   from = "/__/auth/handler"
-  to = "/.netlify/functions/render"
+  to = "/index.html"
   status = 200
   force = true
 
+# ⚡ SPA fallback (todas las rutas van a index.html)
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/render"
+  to = "/index.html"
   status = 200
-  force = true

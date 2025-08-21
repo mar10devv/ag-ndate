@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   onAuthStateChanged,
   signInWithPopup,
@@ -10,9 +9,10 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import Menu from "./Menu";
 
 const clientes = [
-  { label: "Iniciar sesión o registrarse", href: "/login" },
+  { label: "Iniciar sesión o registrarse", href: "/login", highlight: true },
   { label: "Descargar la app", href: "/app" },
   { label: "Ayuda y servicio al cliente", href: "/ayuda" },
 ];
@@ -20,42 +20,18 @@ const clientes = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [lang, setLang] = useState<"es-ES" | "es-UY">("es-ES");
   const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isPremium, setIsPremium] = useState<boolean | null>(null);
 
-  const menuRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    document.documentElement.classList.toggle("overflow-hidden", mobileOpen);
-  }, [mobileOpen]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMobileOpen(false);
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
-
-  // 👇 Revisar autenticación al montar
-  useEffect(() => {
-    console.log("🔎 Iniciando chequeo de autenticación...");
-
     const unsub = onAuthStateChanged(auth, async (u) => {
-      console.log("📡 onAuthStateChanged fired. User:", u);
       setUser(u);
       setCheckingAuth(false);
-
       if (u) {
         try {
           const snap = await getDoc(doc(db, "Usuarios", u.uid));
           setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
-          console.log("✅ Datos Firestore cargados");
         } catch (err) {
           console.error("❌ Error al leer Firestore:", err);
         }
@@ -63,20 +39,14 @@ export default function Navbar() {
         setIsPremium(null);
       }
     });
-
     return () => unsub();
   }, []);
 
-  // 👇 handleLogin con logs
   const handleLogin = async () => {
     try {
-      console.log("🚀 Intentando login...");
       await setPersistence(auth, browserLocalPersistence);
-
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log("✅ Login result:", result.user);
+      await signInWithPopup(auth, googleProvider);
     } catch (e) {
-      console.error("[Navbar] login error:", e);
       alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
     }
   };
@@ -84,22 +54,6 @@ export default function Navbar() {
   const handleLogout = () => {
     signOut(auth).catch((e) => console.error("[Navbar] signOut error:", e));
   };
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handler = (e: MouseEvent | TouchEvent) => {
-      const target = e.target as Node;
-      if (menuRef.current && !menuRef.current.contains(target)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
-    return () => {
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("touchstart", handler);
-    };
-  }, [menuOpen]);
 
   return (
     <header className="sticky top-0 z-[9999] bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -120,7 +74,7 @@ export default function Navbar() {
                 Cargando…
               </span>
             ) : user ? (
-              <div className="flex items-center gap-3">
+              <>
                 <img
                   src={user.photoURL ?? ""}
                   alt="Usuario"
@@ -134,7 +88,7 @@ export default function Navbar() {
                 >
                   Cerrar sesión
                 </button>
-              </div>
+              </>
             ) : (
               <button
                 type="button"
@@ -145,40 +99,90 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* 🔄 Dinámico según usuario */}
-            {user ? (
-              isPremium ? (
-                <a
-                  href="/panel"
-                  className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
-                >
-                  Panel de control
-                </a>
-              ) : (
-                <a
-                  href="/registrar-negocio"
-                  className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
-                >
-                  Registrar negocio
-                </a>
-              )
-            ) : null}
-
-            {/* Dropdown */}
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setMenuOpen((v) => !v)}
-                aria-expanded={menuOpen}
-                aria-haspopup="menu"
-                className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 cursor-pointer"
+            {user && (
+              <a
+                href={isPremium ? "/panel" : "/registrar-negocio"}
+                className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50"
               >
-                Menú ☰
-              </button>
-            </div>
+                {isPremium ? "Panel de control" : "Registrar negocio"}
+              </a>
+            )}
+
+            {/* Menú dropdown */}
+            <Menu
+              open={menuOpen}
+              setOpen={setMenuOpen}
+              user={user}
+              onLogout={handleLogout}
+              links={clientes}
+            />
           </nav>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setMobileOpen((prev) => !prev)}
+              className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+            >
+              ☰
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {mobileOpen && (
+        <div className="md:hidden px-4 pb-4 pt-2 space-y-3 bg-white border-t">
+          {checkingAuth ? (
+            <p className="text-sm text-gray-500">Cargando...</p>
+          ) : user ? (
+            <>
+              <div className="flex items-center gap-2">
+                <img
+                  src={user.photoURL ?? ""}
+                  alt="Usuario"
+                  className="h-8 w-8 rounded-full"
+                  referrerPolicy="no-referrer"
+                />
+                <span className="text-sm">{user.displayName}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left text-sm text-red-600 hover:bg-red-50 px-4 py-2 rounded"
+              >
+                Cerrar sesión
+              </button>
+              <a
+                href={isPremium ? "/panel" : "/registrar-negocio"}
+                className="block text-sm hover:underline"
+              >
+                {isPremium ? "Panel de control" : "Registrar negocio"}
+              </a>
+            </>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="block w-full text-left text-sm text-gray-700 hover:bg-gray-100 px-4 py-2 rounded"
+            >
+              Iniciar sesión
+            </button>
+          )}
+
+          <hr />
+
+          {clientes.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={`block text-sm px-4 py-2 rounded ${
+                item.highlight ? "text-violet-600 font-medium" : "text-gray-700"
+              } hover:bg-gray-100`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

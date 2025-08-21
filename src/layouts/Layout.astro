@@ -1,21 +1,18 @@
 ---
-import "../styles/global.css";
+import "../styles/global.css"; // 👈 correcto, Astro lo procesa
 import NavBar from "../components/Navbar.tsx";
 ---
 
-<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
     <title>Agéndate - citas online con un solo clic</title>
   </head>
   <body class="min-h-screen bg-white">
     <NavBar client:load />
     <main>
-      <slot /> <!-- 👈 aquí se inyecta el contenido de cada página -->
+      <slot /> <!-- 👈 contenido dinámico -->
     </main>
   </body>
 </html>

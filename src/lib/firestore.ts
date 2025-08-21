@@ -1,27 +1,43 @@
-import { db } from "./firebase";
+// src/lib/firestore.ts
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
-// Leer configuración del negocio por UID del usuario
-export async function obtenerConfigNegocio(uid: string) {
+// 🔹 Tipado opcional de la config
+export interface NegocioConfig {
+  nombre: string;
+  slug: string;
+  plantilla: string;
+  hoverColor: string;
+  logoUrl: string;
+  usarLogo: boolean;
+  email: string;
+}
+
+// Obtener configuración de un negocio
+export async function obtenerConfigNegocio(uid: string): Promise<NegocioConfig | null> {
   try {
-    const snap = await getDoc(doc(db, "Negocios", uid)); // 👈 usamos siempre UID
+    const negocioRef = doc(db, "Negocios", uid);
+    const snap = await getDoc(negocioRef);
+
     if (snap.exists()) {
-      return snap.data();
+      return snap.data() as NegocioConfig;
+    } else {
+      return null;
     }
-    return null;
-  } catch (err) {
-    console.error("Error obteniendo config:", err);
+  } catch (error) {
+    console.error("❌ Error al obtener config negocio:", error);
     return null;
   }
 }
 
-// Guardar / actualizar configuración del negocio
-export async function guardarConfigNegocio(uid: string, data: any) {
+// Guardar configuración de un negocio
+export async function guardarConfigNegocio(uid: string, data: Partial<NegocioConfig>) {
   try {
-    await setDoc(doc(db, "Negocios", uid), data, { merge: true }); // 👈 también UID aquí
+    const negocioRef = doc(db, "Negocios", uid);
+    await setDoc(negocioRef, data, { merge: true });
     return true;
-  } catch (err) {
-    console.error("Error guardando config:", err);
+  } catch (error) {
+    console.error("❌ Error al guardar config negocio:", error);
     return false;
   }
 }

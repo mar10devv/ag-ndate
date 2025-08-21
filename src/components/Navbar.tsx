@@ -44,34 +44,45 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
- useEffect(() => {
+useEffect(() => {
   let unsub: (() => void) | null = null;
 
-  getRedirectResult(auth)
-    .catch((error) => {
-      console.error("❌ Error al obtener redirect result:", error);
-    });
+  const checkAuth = async () => {
+    try {
+      const result = await getRedirectResult(auth);
 
-  unsub = onAuthStateChanged(auth, async (u) => {
-    setUser(u);
-    setCheckingAuth(false);
-
-    if (u) {
-      const snap = await getDoc(doc(db, "Usuarios", u.uid));
-      if (snap.exists()) {
-        setIsPremium(snap.data()?.premium ?? false);
-      } else {
-        setIsPremium(false);
+      if (result?.user) {
+        setUser(result.user);
+        const snap = await getDoc(doc(db, "Usuarios", result.user.uid));
+        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+        setCheckingAuth(false);
+        return; // ✅ Ya obtuvimos al usuario, salimos
       }
-    } else {
-      setIsPremium(null);
+    } catch (error) {
+      console.error("❌ Error al obtener redirect result:", error);
     }
-  });
+
+    // 🔁 Si no hubo redirect, usamos el listener normal
+    unsub = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      setCheckingAuth(false);
+
+      if (u) {
+        const snap = await getDoc(doc(db, "Usuarios", u.uid));
+        setIsPremium(snap.exists() ? snap.data()?.premium ?? false : false);
+      } else {
+        setIsPremium(null);
+      }
+    });
+  };
+
+  checkAuth();
 
   return () => {
     if (unsub) unsub();
   };
 }, []);
+
 
   const handleLogin = async () => {
   try {

@@ -42,42 +42,34 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
+ useEffect(() => {
   let unsub: (() => void) | null = null;
 
   getRedirectResult(auth)
-    .then((result) => {
-      if (result?.user) {
-        setUser(result.user);
-        console.log("✅ Sesión iniciada con redirect");
-      }
-    })
     .catch((error) => {
       console.error("❌ Error al obtener redirect result:", error);
-    })
-    .finally(() => {
-      unsub = onAuthStateChanged(auth, async (u) => {
-        setUser(u);
-        setCheckingAuth(false);
-
-        if (u) {
-          const snap = await getDoc(doc(db, "Usuarios", u.uid));
-          if (snap.exists()) {
-            setIsPremium(snap.data()?.premium ?? false);
-          } else {
-            setIsPremium(false);
-          }
-        } else {
-          setIsPremium(null);
-        }
-      });
     });
+
+  unsub = onAuthStateChanged(auth, async (u) => {
+    setUser(u);
+    setCheckingAuth(false);
+
+    if (u) {
+      const snap = await getDoc(doc(db, "Usuarios", u.uid));
+      if (snap.exists()) {
+        setIsPremium(snap.data()?.premium ?? false);
+      } else {
+        setIsPremium(false);
+      }
+    } else {
+      setIsPremium(null);
+    }
+  });
 
   return () => {
     if (unsub) unsub();
   };
 }, []);
-
 
   const handleLogin = async () => {
     try {

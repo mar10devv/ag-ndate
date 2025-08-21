@@ -71,18 +71,22 @@ export default function Navbar() {
   };
 }, []);
 
-  const handleLogin = async () => {
-    try {
-      if (window.location.hostname === "localhost") {
-        await signInWithPopup(auth, googleProvider);
-      } else {
-        await signInWithRedirect(auth, googleProvider);
-      }
-    } catch (e) {
-      console.error("[Navbar] login error:", e);
-      alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
+const handleLogin = async () => {
+  try {
+    // ✅ Establecer persistencia justo antes del login
+    await setPersistence(auth, browserLocalPersistence);
+
+    if (window.location.hostname === "localhost") {
+      await signInWithPopup(auth, googleProvider);
+    } else {
+      await signInWithRedirect(auth, googleProvider);
     }
-  };
+  } catch (e) {
+    console.error("[Navbar] login error:", e);
+    alert(`No se pudo iniciar sesión: ${String((e as any)?.code || e)}`);
+  }
+};
+
 
   const handleLogout = () => {
     signOut(auth).catch((e) => console.error("[Navbar] signOut error:", e));

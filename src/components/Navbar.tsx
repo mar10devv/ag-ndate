@@ -10,6 +10,8 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { setPersistence, browserLocalPersistence } from "firebase/auth";
+
 
 const clientes = [
   { label: "Iniciar sesión o registrarse", href: "/login" },
@@ -71,10 +73,9 @@ export default function Navbar() {
   };
 }, []);
 
-const handleLogin = async () => {
+  const handleLogin = async () => {
   try {
-    // ✅ Establecer persistencia justo antes del login
-    await setPersistence(auth, browserLocalPersistence);
+    await setPersistence(auth, browserLocalPersistence); // ✅ esto asegura que la sesión quede guardada
 
     if (window.location.hostname === "localhost") {
       await signInWithPopup(auth, googleProvider);

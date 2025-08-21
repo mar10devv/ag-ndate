@@ -8,10 +8,10 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 
-// ⚡️ Configuración que te dio Firebase (ajustada en storageBucket)
+// ⚡️ Configuración de Firebase (ajustada con tu dominio en authDomain)
 const firebaseConfig = {
   apiKey: "AIzaSyDMfXjFrcsO_aW53BCcfIMgfZd7gMGf9Jk",
-  authDomain: "agendate-4b2c3.firebaseapp.com",
+  authDomain: "agendateya.netlify.app", // 👈 cambiado a tu dominio en Netlify
   projectId: "agendate-4b2c3",
   storageBucket: "agendate-4b2c3.appspot.com",
   messagingSenderId: "961632832785",
@@ -19,14 +19,13 @@ const firebaseConfig = {
   measurementId: "G-MFS0MZTQJN",
 };
 
-
 // Inicializar Firebase
 export const app = initializeApp(firebaseConfig);
 
 // Auth
 export const auth = getAuth(app);
 
-// 👇 esto asegura que la sesión se guarde en localStorage
+// 👇 asegura que la sesión quede guardada en localStorage
 setPersistence(auth, browserLocalPersistence).catch((err) => {
   console.error("Error configurando persistencia:", err);
 });

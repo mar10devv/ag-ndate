@@ -9,15 +9,15 @@ import {
   GoogleAuthProvider,
 } from "firebase/auth";
 
-// ⚡️ Configuración de Firebase (manteniendo el authDomain original de Firebase)
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDMfXjFrcsO_aW53BCcfIMgfZd7gMGf9Jk",
-  authDomain: "agendate-4b2c3.firebaseapp.com", // 👈 este debe ser el dominio oficial de Firebase
-  projectId: "agendate-4b2c3",
-  storageBucket: "agendate-4b2c3.appspot.com",
-  messagingSenderId: "961632832785",
-  appId: "1:961632832785:web:eca2dc4f2773c0546c50b0",
-  measurementId: "G-MFS0MZTQJN",
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID,
+  measurementId: import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Inicializar Firebase

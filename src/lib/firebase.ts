@@ -5,6 +5,7 @@ import {
   getAuth,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
   GoogleAuthProvider,
 } from "firebase/auth";
 
@@ -25,9 +26,10 @@ export const app = initializeApp(firebaseConfig);
 // Auth
 export const auth = getAuth(app);
 
-// 👇 asegura que la sesión quede guardada en localStorage
-setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.error("Error configurando persistencia:", err);
+// 👇 Intentar guardar sesión en localStorage, si falla usar sessionStorage
+setPersistence(auth, browserLocalPersistence).catch(async (err) => {
+  console.warn("⚠️ LocalPersistence no disponible, usando Session:", err);
+  await setPersistence(auth, browserSessionPersistence);
 });
 
 // Proveedor de Google
